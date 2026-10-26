@@ -1,6 +1,6 @@
 # Data dictionary and lineage
 
-Official schemas below come from M5 documentation; full source-file inspection remains pending access. The loader independently checks required fields and values on execution.
+Official schema requirements below are enforced by the loader. The user completed the official-file audit and pipeline on Windows; the resulting selected panel and provenance were inspected independently. Full raw files are not bundled in the repository.
 
 | Field | Source | Interpretation / availability |
 |---|---|---|

@@ -1,7 +1,9 @@
-# Verified implementation-only resume draft
+# Resume-ready project description
 
-Not yet an empirical-impact project description. These bullets describe completed software work; add M5 scope and results only after running the official dataset.
+RetailOS — Inventory Decision Intelligence | Python, SQL, scikit-learn, SciPy/HiGHS, Streamlit
 
-- Implemented RetailOS, a Python decision-support application connecting chronological sales forecasting, integer inventory optimization and policy replay under shared budget constraints.
-- Validated the optimizer against exhaustive enumeration and hand-calculated inventory costs; added future-data leakage checks and automated Streamlit navigation tests.
-- Built reproducible source-schema validation, provenance tracking, scenario sensitivity and deterministic review workflows; real M5 benchmarking is pending authenticated data access.
+- Built a reproducible M5 sales forecasting and inventory decision application for 42 product–store series, connecting data validation, integer budget allocation and an interactive Streamlit dashboard.
+- Evaluated four forecasting models chronologically; gradient boosting reduced held-out daily MAE by 8.04% versus a trailing 28-day mean across two 28-day test windows.
+- Compared three inventory policies under identical simulated operating constraints; diagnosed an 11.97% cost increase from scenario optimization and validated results with independent accounting replay and sensitivity analysis.
+
+These claims describe the inspected first run. Costs are counterfactual simulation estimates, not measured Walmart operating savings. No autonomous LLM ordering or production deployment is claimed. Explain the assumptions and the negative optimization result when discussing this project.

@@ -1,19 +1,31 @@
-# Feasibility audit — 2026-10-26
+# Feasibility and data-access record — 2026-10-26
 
-**Verdict: software feasible; primary empirical work blocked by official data access.**
+**Current state: first real-data pipeline completed; initial access blocker resolved by the user's official Kaggle download.**
 
-Evidence inspected: official Kaggle competition landing/data page; official M5 Competitors' Guide (16-page PDF); official Kaggle CLI instructions; SciPy milp and scikit-learn histogram boosting documentation.
+## Access history
 
-- Official M5 framing: daily Walmart unit sales and a 28-day forecast horizon. Documentation describes grouped sales, selling prices and calendar effects.
-- Local attempts to list and download competition files using unauthenticated Kaggle API both returned HTTP 401 Unauthorized. No configured Kaggle token or credentials file was detected. No third-party mirror or alternate sales dataset was used.
-- The official rules URL returned no readable body in the retrieval tool. Licensing, any redistribution rights, and present account-specific access conditions remain **unverified**, not presumed prohibited or allowed.
-- Actual source file hashes, missing-value rates, exact current downloadable-file shapes and price completeness cannot be audited before download. Implemented checks produce them when the files are supplied.
-- A histogram gradient boosting model was chosen instead of requiring LightGBM: both are suitable ML candidates, and the former uses the already available scikit-learn runtime. No accuracy advantage is assumed.
-- Scenario costs/stock/budgets are explicit hypothetical inputs, never represented as actual Walmart operating inputs.
+Initial unauthenticated Kaggle API probes returned HTTP 401 in the build environment. The user subsequently downloaded the official competition files through their Kaggle account, placed the CSVs in `data/raw`, passed the source audit and executed the complete pipeline on Windows. The user supplied the completed result archive for independent inspection; no alternate sales dataset was substituted.
 
-Smallest next action: use your Kaggle account to review the official data/rules and download the competition archive; provide the archive or its required CSVs. No API key needs to be shared. Do not publish raw or derived data until usage rights are verified.
+The raw official CSVs were not sent to the current execution environment. Independent checks here replay saved decisions against the supplied selected panel and verify aggregate outputs. This is distinct from an independent raw-to-results training replication.
+
+## Source audit from the final inspected run
+
+- 42 selected product–store series and 81,522 historical selected rows.
+- 17 candidate series excluded by the minimum early price-listing history rule.
+- 16,002 selected rows have no price; missing prices remain unfilled from future observations.
+- Zero positive-sales rows lack a matching price.
+- Validation/evaluation releases agree on common selected observations.
+
+The pre-fix audit used a different subset and its missing-price count must not be substituted for the final provenance.
+
+## Data rights and assumptions
+
+The official rules page did not expose a readable body through the retrieval path. Current usage and redistribution terms have not been comprehensively verified. Raw data, detailed SKU forecasts/orders and processed panels are not included in the public repository. Only aggregate research summaries, original plots and actual app screenshots are deliberately added. The software license does not grant rights to M5 source data.
+
+Purchase cost, holding rates, shortage penalties, initial stock and lead times are explicit modeled inputs; none are asserted as Walmart's actual operating inputs. The first simulation does not establish inventory savings.
 
 Sources:
+
 - https://www.kaggle.com/competitions/m5-forecasting-accuracy/data
 - https://www.kaggle.com/competitions/m5-forecasting-accuracy/rules
 - https://storage.googleapis.com/kaggle-forum-message-attachments/772349/15032/M5-Competitors-Guide-Final-10-March-2020.pdf

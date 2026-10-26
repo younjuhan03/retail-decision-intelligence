@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 from retailos.pipeline import evaluate_window
+from retailos.reporting import policy_totals, forecast_totals, MODEL_LABELS
 
 st.set_page_config(page_title='RetailOS | Inventory Intelligence', page_icon='◈', layout='wide')
 st.markdown('''<style>.stApp{background:#f5f7fb}h1{letter-spacing:-1.5px}div[data-testid="stMetric"]{background:white;border:1px solid #dce4ef;padding:18px;border-radius:12px}.eyebrow{color:#2563eb;font-size:13px;font-weight:700;letter-spacing:3px}.hero{background:#102a43;color:white;border-radius:18px;padding:34px;margin-bottom:24px}.hero h1{color:white}.hero p{color:#bcd1e6}</style>''', unsafe_allow_html=True)
@@ -29,26 +30,45 @@ if not (output / 'summary.json').exists():
     st.stop()
 
 @st.cache_data
-def read_results(folder):
+def read_results(folder, version):
     p = Path(folder)
     return (json.loads((p / 'summary.json').read_text()), json.loads((p / 'config.json').read_text()),
             pd.read_parquet(p / 'forecasts.parquet'), pd.read_csv(p / 'policy_evaluation.csv'),
             pd.read_csv(p / 'forecast_metrics.csv'), pd.read_csv(p / 'sensitivity.csv'))
 
-summary, cfg, forecasts, policies, metrics, sensitivity = read_results(str(output))
+summary, cfg, forecasts, policies, metrics, sensitivity = read_results(str(output), (output / 'summary.json').stat().st_mtime_ns)
 st.caption('All costs below are simulation estimates conditional on operating assumptions. No Walmart implementation or endorsement.')
-origin = st.sidebar.selectbox('Held-out forecast origin (M5 day)', summary['test_origins'])
+origin = st.sidebar.selectbox('Forecast origin • detail pages (M5 day)', summary['test_origins'], disabled=nav == 'Executive Overview')
+if nav == 'Executive Overview':
+    st.sidebar.caption('Executive Overview pools all held-out windows. The origin selector applies to detail pages.')
 current = forecasts[forecasts.origin == origin]
 calibration = forecasts[forecasts.origin.isin(cfg['origins'][:3])]
 if nav == 'Executive Overview':
-    st.subheader('Evidence, before action')
+    st.subheader('First real-data study • all held-out windows')
+    st.caption(f"Aggregate scope: {len(summary['test_origins'])} held-out 28-day episodes, {policies.start_date.min()} through {policies.end_date.max()}. Each episode resets initial inventory.")
+    forecast_table = forecast_totals(metrics[metrics.origin.isin(summary['test_origins'])])
+    totals = policy_totals(policies)
     c1, c2, c3 = st.columns(3)
     c1.metric('Product–store series', summary['series_count'])
-    c2.metric('Selected forecast', summary['selected_model'])
-    c3.metric('Measured 80% interval coverage', f"{summary['empirical_80pct_coverage']:.1%}")
-    st.warning('REVIEW REQUIRED — limited calibration and held-out time blocks; operating assumptions require review.')
-    st.dataframe(pd.DataFrame(summary['improvements']), hide_index=True, use_container_width=True)
-    st.image(str(output / 'cost_composition.png'))
+    c2.metric('Selected forecast', MODEL_LABELS.get(summary['selected_model'], summary['selected_model']))
+    c3.metric('10–90% scenario-envelope coverage', f"{summary['empirical_80pct_coverage']:.1%}")
+    st.warning('REVIEW REQUIRED — a better point forecast has not established a better inventory policy. The scenario envelope is uncalibrated; operating inputs are assumptions.')
+    st.markdown('**Inventory policies · pooled held-out simulation**')
+    display = totals[['total_cost', 'procurement', 'holding_cost', 'lost_sales_penalty', 'fill_rate', 'ending_inventory']].rename(columns={
+        'total_cost': 'Total cost ($)', 'procurement': 'Purchases ($)', 'holding_cost': 'Holding ($)',
+        'lost_sales_penalty': 'Unmet-sales penalty ($)', 'fill_rate': 'Proxy fill rate', 'ending_inventory': 'Ending units (sum)'})
+    st.dataframe(display.style.format({'Total cost ($)': '{:,.2f}', 'Purchases ($)': '{:,.2f}', 'Holding ($)': '{:,.2f}',
+        'Unmet-sales penalty ($)': '{:,.2f}', 'Proxy fill rate': '{:.1%}', 'Ending units (sum)': '{:,.0f}'}), use_container_width=True)
+    for comparison in summary['improvements']:
+        reduction = comparison.get('simulation_cost_change_fraction')
+        if reduction is not None:
+            direction = 'lower' if reduction >= 0 else 'higher'
+            label = {'historical_average': 'trailing-average orders', 'forecast_order_up_to': 'forecast order-up-to'}.get(comparison['baseline'], comparison['baseline'])
+            st.write(f"Scenario-optimized cost was **{abs(reduction):.2%} {direction}** than {label} across {comparison['paired_windows']} paired windows.")
+    st.bar_chart(totals[['procurement', 'holding_cost', 'lost_sales_penalty']].rename(columns={'procurement': 'Purchases', 'holding_cost': 'Holding', 'lost_sales_penalty': 'Unmet-proxy penalty'}))
+    st.markdown('**Forecast errors · the same held-out windows**')
+    st.dataframe(forecast_table.style.format({'mae': '{:.3f}', 'rmse': '{:.3f}', 'wape': '{:.1%}', 'bias': '{:+.3f}'}), hide_index=True, use_container_width=True)
+    st.caption('Lower MAE does not imply lower inventory cost. Three unique calibration blocks support the scenario generator; sampled paths are not independent historical evidence.')
     st.write(summary['uncertainty_warning'])
 elif nav == 'Demand Intelligence':
     sku = st.selectbox('Product–store', sorted(current.id.unique()))
@@ -78,11 +98,14 @@ elif nav in ['Inventory Optimizer', 'Scenario Lab']:
         st.caption('The replay uses held-out sales only for evaluation. Recommendations use forecasts and earlier residuals.')
     if nav == 'Scenario Lab':
         st.subheader('Precomputed one-factor sensitivity')
-        st.dataframe(sensitivity, hide_index=True, use_container_width=True)
+        st.caption(f'All sensitivity rows below use selected origin d_{origin}.')
+        st.dataframe(sensitivity[sensitivity.origin == origin], hide_index=True, use_container_width=True)
 elif nav == 'Policy Backtesting':
     st.subheader('Same budget. Same lead time. Same held-out proxy.')
-    st.dataframe(policies, hide_index=True, use_container_width=True)
-    st.bar_chart(policies.groupby('policy')[['procurement', 'holding_cost', 'lost_sales_penalty']].sum())
+    selected_policies = policies[policies.origin == origin]
+    st.caption(f'Selected origin d_{origin} only. Executive Overview contains the pooled comparison.')
+    st.dataframe(selected_policies, hide_index=True, use_container_width=True)
+    st.bar_chart(policy_totals(selected_policies)[['procurement', 'holding_cost', 'lost_sales_penalty']])
     st.caption('Each window resets to the same assumed inventory. This is a repeated episode study, not continuous Walmart replenishment history.')
 elif nav == 'AI Decision Review':
     st.subheader('Grounded review • deterministic mode')
@@ -93,4 +116,4 @@ elif nav == 'AI Decision Review':
     st.write('Advisor: explains verified spend and constraints. Challenger: flags limited evidence and assumed inputs. Coordinator: uses the same validated status. No LLM or invented confidence score is used.')
 else:
     st.subheader('What this experiment can establish')
-    st.markdown((root / 'docs/methodology.md').read_text())
+    st.markdown((root / 'docs/methodology.md').read_text(encoding='utf-8'))

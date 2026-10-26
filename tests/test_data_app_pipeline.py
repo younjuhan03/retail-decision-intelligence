@@ -57,6 +57,18 @@ def test_full_pipeline_on_artificial_schema_fixture(tmp_path, tiny_panel, monkey
     assert (results.procurement <= results.budget + 1e-6).all()
     assert (results.fill_rate.between(0, 1)).all()
     assert all(d['review']['status'] in ['REVIEW REQUIRED', 'HOLD'] for d in json.loads((output / 'decisions.json').read_text()))
+    # Aggregate exporter is independently replayed before public evidence is written.
+    import importlib.util
+    module_path = Path(__file__).parents[1] / 'scripts/export_evidence.py'
+    spec = importlib.util.spec_from_file_location('evidence_export', module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    export_dir = tmp_path / 'exported_docs'
+    evidence = module.export(output, export_dir)
+    assert evidence['independently_replayed_policy_windows'] == 6
+    assert (export_dir / 'case_study.html').is_file()
+    assert (export_dir / 'evidence/first_run.json').is_file()
+    assert not list(export_dir.rglob('*.parquet'))
     from streamlit.testing.v1 import AppTest
     monkeypatch.setenv('RETAILOS_RESULTS', str(output))
     app_path = str(Path(__file__).parents[1] / 'app/streamlit_app.py')
@@ -101,3 +113,20 @@ def test_validation_release_must_agree(tmp_path, tiny_panel):
     sales.to_csv(raw / 'sales_train_validation.csv', index=False)
     with pytest.raises(ValueError, match='releases disagree'):
         load_m5(raw, cfg)
+
+
+def test_late_activation_excluded_before_rank_selection(tmp_path, tiny_panel):
+    raw, cfg = official_shape_fixture(tmp_path, tiny_panel)
+    prices = pd.read_csv(raw / 'sell_prices.csv')
+    late_week = (min(cfg['origins']) - 60) // 7
+    prices = prices[(prices.item_id != 'fixture_1') | (prices.wm_yr_wk >= late_week)]
+    prices.to_csv(raw / 'sell_prices.csv', index=False)
+    sales = pd.read_csv(raw / 'sales_train_evaluation.csv')
+    early_days = [f'd_{i}' for i in range(1, late_week * 7 + 1)]
+    sales.loc[sales.item_id == 'fixture_1', early_days] = 0
+    sales.to_csv(raw / 'sales_train_evaluation.csv', index=False)
+    panel, selected, cal, manifest = load_m5(raw, cfg)
+    assert list(selected.item_id) == ['fixture_0']
+    assert manifest['excluded_short_history_candidates'] == 1
+    from retailos.forecast import features
+    assert len(features(panel, cal, min(cfg['origins']))) == 28

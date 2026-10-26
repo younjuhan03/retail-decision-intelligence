@@ -1,16 +1,19 @@
 # Windows setup and reproduction
 
-1. Extract the archive. Open `retail-decision-intelligence` in VS Code. Open a PowerShell terminal.
-2. Install Python 3.11 with the Windows Python launcher.
+1. Open `retail-decision-intelligence` in VS Code and open a PowerShell terminal.
+2. Check Python with `python --version`. The user completed the original real-data run on Python 3.14.6; CI targets Python 3.11.
 3. Run:
 
 ```powershell
-py -3.11 -m venv .venv
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-4. Download the official M5 competition archive using Kaggle's authenticated website. Review access and data terms. Do not share credentials. Extract required CSVs into `data/raw/` directly (not another nested folder).
+If `python` is not recognized, install Python and reopen VS Code. A `py` command is not required. Using the environment's executable directly avoids changing PowerShell activation policy.
+
+4. Download the official M5 competition files using your Kaggle account after reviewing its terms. Extract the CSVs directly into `data/raw/`, not a nested subfolder. Keep credentials outside Git.
 5. Execute:
 
 ```powershell
@@ -19,9 +22,15 @@ py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m streamlit run app/streamlit_app.py
 ```
 
-6. Open the localhost URL printed by Streamlit. Open `results/local/case_study.html` in a browser after a successful real-data run.
-7. Read `results/local/summary.json`, the window tables and `sensitivity.csv` before drafting resume claims. Never replace missing real-data outputs with test fixtures.
+6. Open Streamlit's printed localhost URL. Completed quantitative results live in `results/local/`. Read `summary.json`, `policy_evaluation.csv` and `sensitivity.csv` before making any performance claim.
+7. Export aggregate documentation:
 
-Memory: the loader filters sales while wide and melts only selected series. Price input is streamed. The optional validation-release comparison loads that earlier CSV in memory; omit this optional file on constrained machines if needed. Optimization runtime depends on scenario count and SKU count. Failed or time-limited solves remain REVIEW REQUIRED. Runtime on a normal Windows laptop has not been benchmarked.
+```powershell
+.\.venv\Scripts\python.exe scripts/export_evidence.py --results results/local
+```
 
-Troubleshooting: missing data errors list the required filename; calendar and price duplicate errors require inspecting source files rather than dropping records silently. An app saying DATA REQUIRED means the pipeline has not completed at the configured output location. No LLM configuration is required.
+The generated English page is `docs/case_study.html`. GitHub displays its source; download it and open in a browser for the formatted view. The exporter verifies saved costs using a separate physical replay and excludes source-level rows from its public outputs. Publication rights for any additional data assets still need review.
+
+If the app is still running after you receive a source update, stop it with Ctrl+C and run the Streamlit command again. A fresh clone without local data/results should display DATA REQUIRED, even though committed documentation contains a completed research snapshot.
+
+Memory: filter sales while wide and stream price input. The optional validation-release comparison loads the earlier CSV in memory; omit this optional file on constrained machines if needed. Solver runtime depends on scope and scenario count. Missing data and failed solves remain explicit errors or REVIEW REQUIRED, not fabricated results.

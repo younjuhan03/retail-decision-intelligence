@@ -9,4 +9,6 @@ data/raw/*
 data/processed/
 results/*
 !results/.gitkeep
-assets/screenshots/
+# Only deliberately exported aggregate evidence and application screenshots are tracked.
+*.patch
+*.zip

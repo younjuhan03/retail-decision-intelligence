@@ -12,4 +12,4 @@ For an authorized private server, install the package, provision official data u
 
 Streamlit-hosted services can launch with `app/streamlit_app.py` as entrypoint after installing dependencies. The app adds the repository src directory to its import path. The compact package starts in an honest missing-data state if results are absent. Private hosting support and data terms must be checked with the selected provider before deployment; no provider account or deployment was configured here.
 
-Before GitHub publication: review `git status`, exclude raw data, derived outputs and credentials, confirm data publication rights for every image/table added, run tests, and replace the empirical-pending status only after actual M5 execution.
+Before publishing additional changes: review `git status`, exclude raw data, derived outputs and credentials, confirm data publication rights for every image/table added, run tests, and keep the documented research status aligned with verified execution and distinguish deployment from a source-code upload.

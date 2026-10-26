@@ -1,41 +1,46 @@
-# Final verification report — 2026-10-26
+# Verification report — 2026-10-26
 
-## Verdict
+## Current verdict
 
-**Software implementation delivered; empirical project remains incomplete until official M5 data is supplied and executed.** Do not call this a finished M5 impact study or submit simulated fixture findings as business results.
+**The first official-data study and local application run are complete. The optimizer remains REVIEW REQUIRED.** Gradient boosting improved point-forecast MAE, but scenario optimization did not improve the evaluated base-case inventory cost. This release documents that result and corrects display scope; it does not claim a better ordering algorithm.
 
-## Executed checks
+## Evidence and verification boundaries
 
-| Check | Observed outcome |
+| Check | Evidence / result |
 |---|---|
-| `python -m pip install -e '.[dev]'` | Successful editable package installation |
-| `python -m pytest -q` | **30 passed in 8.14 seconds** on the final tested code |
-| `python -m compileall -q src app` | Successful compilation |
-| CLI audit with no data | Expected exit code 2, names missing official sales file; no fallback |
-| Actual Streamlit server start | Successful; localhost health endpoint returned HTTP 200 `ok`, root returned HTTP 200 HTML |
-| Streamlit AppTest | Seven navigation sections and scenario solve exercised on artificial official-schema fixtures; missing-data HOLD state exercised separately |
-| Complete pipeline | Executed using artificial two-SKU official-schema fixtures in pytest temporary directories, including training, policy replay, sensitivity, Parquet, CSV, chart and HTML generation |
-| Optimizer correctness | Objective and replay compared with exhaustive feasible integer enumeration on a tiny scenario problem |
-| Cost accounting | Independently hand-checked daily arrival, stock, shortage and holding arithmetic |
-| Leakage checks | Future sales/prices altered; origin features and ML forecasts unchanged |
-| Edge cases | Zero budget/sales, empty candidates, huge demand, delayed arrival, negative/non-finite data, infeasible minimum orders, solver timeout, invalid orders |
-| Data checks | Missing schema fields, duplicate price keys, negative sales and validation-release disagreements rejected |
-| Grounded review | APPROVE/HOLD/REVIEW REQUIRED/INFEASIBLE checked; numeric spend matches orders |
+| Original official-data run | User executed the pipeline on Windows, Python 3.14.6; the complete `local2.zip` result archive was inspected |
+| Real-data scope | 42 product–store series, 81,522 selected historical rows, two 28-day test episodes, 2,352 held-out SKU-days |
+| Independent accounting replay | All six saved policy-window total costs reproduced; integer allocation and budget checks passed |
+| Aggregate evidence export | Executed against the supplied official-data results; generates charts, JSON/CSV summaries and English case study |
+| Baseline GitHub CI | Initial commit `cf931743482dc1ae0c50931419bb6cfd5798683b` completed successfully on GitHub Actions |
+| Current software tests | 33 automated tests in the current revision; see test run evidence and live CI status below |
+| Actual app screenshots | Captured from this revision's running Streamlit app using the inspected real results, not a mockup |
+| Browser inspection | Executive overview and selected-window backtesting opened without an application exception |
+| Missing-data state | Still displays DATA REQUIRED / HOLD when a fresh clone has no locally computed results |
+| Raw-data exclusion | Source CSVs, processed Parquet, detailed SKU outputs, credentials and virtual environments remain outside the public commit |
 
-Fixture results are not bundled as project evidence. Fixture tests validate program behavior, not M5 accuracy, real-data compatibility at scale, business benefit or statistical robustness. Testing was performed on Linux with Python 3.12; Windows commands and Python 3.11 CI configuration have not been executed on their target platforms here. The GitHub Actions file is provided but has not run on GitHub.
+The original result archive records NumPy 2.5.4, pandas 3.1.0, SciPy 1.18.1 and scikit-learn 1.9.1 on Python 3.14.6. These versions are reported by the original run, not claimed as the versions used for every subsequent verification. Aggregate evidence includes source-result hashes. The official CSVs themselves were not uploaded to this execution environment; training was not independently repeated on the complete raw files here.
 
-## Actual blockers / unresolved work
+The original Windows test screenshot showed 30 passing tests before the activation regression test and reporting tests were added. Current fixture tests cover the pipeline, deterministic decisions and all seven app sections. Fixture metrics are not used as project findings. They cannot prove forecast quality or business benefit.
 
-1. Official Kaggle list and download API probes returned HTTP 401; credentials were not configured. The final real M5 pipeline, model comparisons, subset quality audit and quantitative business conclusions have not run.
-2. Official competition rules were not readable through the retrieval path. Current data-use/redistribution permissions are unverified. Raw/derived data is excluded from the repository; publishing outputs requires checking the applicable terms.
-3. Browser-based screenshot capture is incomplete. Playwright's Chromium archive download failed; no screenshot or fabricated UI image is supplied. AppTest and actual HTTP startup checks do not replace pixel-level visual QA.
-4. The result-populated case study is generated only after real-data execution. `docs/case_study_pending.html` is an honest interim implementation brief. Resume bullets describe software accomplishments only.
-5. Default evaluation has only three calibration blocks and two held-out test blocks. Review remains required, even after a successful run; no inferential confidence interval or calibrated uncertainty claim is supplied.
-6. Scenario optimization runtime, missing price patterns and activation eligibility on the full official dataset remain unbenchmarked. Late activation fails explicitly if insufficient history is available; no silent replacement occurs.
-7. External GitHub publication, cloud deployment, real order placement and optional LLM integration were not performed. Deterministic quantitative/review mode is implemented.
+Live checks: [GitHub Actions](https://github.com/younjuhan03/retail-decision-intelligence/actions/workflows/tests.yml). Only a successful run for the corresponding commit establishes that commit's CI status; the badge is not a claim about an unexecuted future revision.
 
-## Scope of release
+## What changed after the first experiment
 
-Included: source, automatic tests, compact configuration, README, software license excluding third-party data, Windows instructions, data dictionary/lineage, mathematical methodology, deployment guide, feasibility audit, honest interim English HTML brief and result-page generator, implementation-only resume draft.
+- Recorded actual first-run errors, simulated policy costs, uncertainty coverage and sensitivity findings.
+- Added aggregate evidence export with a separate physical accounting replay.
+- Renamed displayed policy labels to distinguish trailing-average orders from the all-history mean forecast.
+- Replaced the ambiguous "80% interval coverage" label with "10–90% scenario-envelope coverage"; the legacy JSON key is retained for compatibility.
+- Explicitly labeled the overview as pooled across all test episodes; backtesting and scenario detail tables now follow the selected origin.
+- Disabled the detail-origin selector on the pooled overview.
+- Added a regression test for late activation and tests for pooled display rates and forecast error aggregation.
+- Replaced the pending case-study placeholder with an evidence-populated, print-aware English HTML page. No model retraining or test-period parameter tuning was performed.
 
-Next action: download the official archive using your own Kaggle account after reviewing its terms, then supply the archive or required CSVs. No API credential needs to be disclosed. Run the audit first; only then run and inspect the primary analysis, sensitivity tables and real app screenshots.
+## Remaining limitations
+
+1. The optimizer's modeled cost is 11.97% above trailing-average orders and 11.60% above forecast order-up-to under the base assumptions. Do not label this as cost savings.
+2. Three unique calibration time blocks and two held-out episodes are insufficient for robust tail-risk or population-effect claims. The scenario envelope's measured coverage is 38.52%, not evidence of calibrated 80% protection.
+3. Inventory, purchase costs, shortages, budget and lead time are assumed. Observed sales can be demand-censored. Zero salvage and episode resets simplify operations.
+4. Current competition data redistribution permissions remain unverified. The repository provides aggregate research summaries and original figures; this does not license or redistribute the M5 source data. Review source terms before adding any other assets.
+5. The source snapshot and already-inspected final windows must be preserved. Revised methods need development-period selection and a clearly designated new holdout before a fresh confirmation claim.
+6. No live external app deployment, production order placement, optional LLM provider or autonomous agent ordering is implemented.

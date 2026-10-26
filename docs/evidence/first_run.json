@@ -1,0 +1,78 @@
+{
+  "study": "RetailOS first real-data study",
+  "status": "COMPUTED; REVIEW REQUIRED",
+  "source": "https://www.kaggle.com/competitions/m5-forecasting-accuracy/data",
+  "series_count": 42,
+  "test_origins": [
+    1885,
+    1913
+  ],
+  "start_date": "2016-03-28",
+  "end_date": "2016-05-22",
+  "test_episodes": 2,
+  "sku_days": 2352,
+  "calibration_unique_time_blocks": 3,
+  "unfavorable_sensitivity_variants": 12,
+  "alternative_sensitivity_variants": 13,
+  "sampled_scenarios": 8,
+  "selected_forecast": "gradient_boosting",
+  "mae_reduction_vs_rolling_pct": 8.042476864677306,
+  "cost_increase_vs_trailing_average_pct": 11.96700854803221,
+  "cost_increase_vs_forecast_order_up_to_pct": 11.597910992698601,
+  "uncalibrated_10_90_scenario_envelope_coverage": 0.3852040816326531,
+  "cost_increase_dollars": 2643.347603000002,
+  "cost_delta_breakdown": {
+    "procurement": -0.03900000000066939,
+    "holding_cost": 18.862103000000047,
+    "lost_sales_penalty": 2624.5244999999995
+  },
+  "independently_replayed_policy_windows": 6,
+  "interpretation": "Historical-sales-proxy counterfactual simulation with assumed operating inputs; not measured Walmart savings.",
+  "source_result_hashes": {
+    "summary.json": "4286ae1fcad949f509f56a3893aba69cc62a66bf8f732d4a01419480ea34ed34",
+    "policy_evaluation.csv": "8ec0fe9be9f26ea4fdb4fcb28a3ea6bb169d260c69527513feb988be96f69620",
+    "forecast_metrics.csv": "b242486835fb361f5b8a295633ad836a4d4c747b240b6463b8d60b2dad435a02",
+    "interval_coverage.csv": "ff471c9af9b590a7199120a6c25991a49262bb0fc0fa385280b890f4525e89ce"
+  },
+  "operating_assumptions": {
+    "stores": [
+      "TX_1",
+      "CA_1",
+      "WI_1"
+    ],
+    "per_store_department": 2,
+    "origins": [
+      1773,
+      1801,
+      1829,
+      1857,
+      1885,
+      1913
+    ],
+    "horizon": 28,
+    "cost_ratio": 0.65,
+    "budget_ratio": 0.75,
+    "holding_daily_ratio": 0.002,
+    "penalty_cost_multiple": 3.0,
+    "lead_days": 2,
+    "initial_days": 3.0,
+    "uncertainty_scale": 1.0,
+    "scenario_count": 8,
+    "seed": 42
+  },
+  "original_run_environment": {
+    "python": "3.14.6",
+    "packages": {
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "scipy": "1.18.1",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "provenance_audit": {
+    "rows": 81522,
+    "missing_price_rows": 16002,
+    "positive_sales_without_price": 0
+  },
+  "data_release_note": "Only aggregate research summaries and original figures are exported; source data, SKU rows, forecasts, orders, prices and credentials remain excluded. This does not grant redistribution rights to M5 data."
+}
