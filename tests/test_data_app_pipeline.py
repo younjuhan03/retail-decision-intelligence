@@ -130,3 +130,48 @@ def test_late_activation_excluded_before_rank_selection(tmp_path, tiny_panel):
     assert manifest['excluded_short_history_candidates'] == 1
     from retailos.forecast import features
     assert len(features(panel, cal, min(cfg['origins']))) == 28
+
+
+def test_expanded_comparison_four_policies(tmp_path, tiny_panel, monkeypatch):
+    raw, cfg = official_shape_fixture(tmp_path, tiny_panel)
+    cfg.update(origins=[1605, 1633, 1661, 1689, 1717, 1745, 1773, 1801],
+               calibration_count=4, include_point_optimizer=True, run_sensitivity=False,
+               evaluation_role='exploratory retrospective comparison')
+    out = tmp_path / 'comparison'
+    summary = run(raw, out, cfg)
+    assert summary['calibration_origins'] == [1605, 1633, 1661, 1689]
+    assert summary['selection_origin'] == 1717
+    assert summary['test_origins'] == [1745, 1773, 1801]
+    results = pd.read_csv(out / 'policy_evaluation.csv')
+    assert len(results) == 12
+    assert set(results.policy) == {'historical_average', 'forecast_order_up_to', 'point_optimized', 'optimized'}
+    assert (results.procurement <= results.budget + 1e-6).all()
+    assert np.allclose(results.total_cost, results.procurement + results.holding_cost + results.lost_sales_penalty)
+    comparison = pd.read_csv(out / 'policy_comparison.csv')
+    assert len(comparison) == 4
+    assert comparison.paired_windows.eq(3).all()
+    assert pd.read_csv(out / 'sensitivity.csv').variant.eq('base').all()
+    from streamlit.testing.v1 import AppTest
+    monkeypatch.setenv('RETAILOS_RESULTS', str(out))
+    app = AppTest.from_file(str(Path(__file__).parents[1] / 'app/streamlit_app.py'), default_timeout=60).run()
+    assert not app.exception
+    app.sidebar.radio[0].set_value('Inventory Optimizer').run()
+    app.button[0].click().run()
+    assert not app.exception
+
+
+
+def test_point_orders_ignore_future_sales(tiny_panel):
+    from retailos.forecast import predict
+    from retailos.pipeline import evaluate_window
+    panel, cal = tiny_panel
+    cfg = json.loads((Path(__file__).parents[1] / 'configs/compact.json').read_text())
+    cfg.update(include_point_optimizer=True, scenario_count=2)
+    past, _ = predict(panel, cal, 1773)
+    pred, _ = predict(panel, cal, 1885)
+    _, first, _, _ = evaluate_window(pred, past, 'rolling_mean', cfg)
+    changed = pred.copy()
+    changed['sales'] = changed.sales + 100
+    _, second, _, _ = evaluate_window(changed, past, 'rolling_mean', cfg)
+    for policy in ['point_optimized', 'optimized']:
+        assert [r['order_units'] for r in first if r['policy'] == policy] == [r['order_units'] for r in second if r['policy'] == policy]

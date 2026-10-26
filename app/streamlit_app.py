@@ -38,14 +38,16 @@ def read_results(folder, version):
 
 summary, cfg, forecasts, policies, metrics, sensitivity = read_results(str(output), (output / 'summary.json').stat().st_mtime_ns)
 st.caption('All costs below are simulation estimates conditional on operating assumptions. No Walmart implementation or endorsement.')
+if 'evaluation_role' in summary:
+    st.info(summary['evaluation_role'])
 origin = st.sidebar.selectbox('Forecast origin • detail pages (M5 day)', summary['test_origins'], disabled=nav == 'Executive Overview')
 if nav == 'Executive Overview':
-    st.sidebar.caption('Executive Overview pools all held-out windows. The origin selector applies to detail pages.')
+    st.sidebar.caption('Executive Overview pools all evaluation windows. The origin selector applies to detail pages.')
 current = forecasts[forecasts.origin == origin]
-calibration = forecasts[forecasts.origin.isin(cfg['origins'][:3])]
+calibration = forecasts[forecasts.origin.isin(cfg['origins'][:int(cfg.get('calibration_count', 3))])]
 if nav == 'Executive Overview':
-    st.subheader('First real-data study • all held-out windows')
-    st.caption(f"Aggregate scope: {len(summary['test_origins'])} held-out 28-day episodes, {policies.start_date.min()} through {policies.end_date.max()}. Each episode resets initial inventory.")
+    st.subheader('Computed study • all evaluation windows')
+    st.caption(f"Aggregate scope: {len(summary['test_origins'])} evaluation 28-day episodes, {policies.start_date.min()} through {policies.end_date.max()}. Each episode resets initial inventory.")
     forecast_table = forecast_totals(metrics[metrics.origin.isin(summary['test_origins'])])
     totals = policy_totals(policies)
     c1, c2, c3 = st.columns(3)
@@ -53,7 +55,7 @@ if nav == 'Executive Overview':
     c2.metric('Selected forecast', MODEL_LABELS.get(summary['selected_model'], summary['selected_model']))
     c3.metric('10–90% scenario-envelope coverage', f"{summary['empirical_80pct_coverage']:.1%}")
     st.warning('REVIEW REQUIRED — a better point forecast has not established a better inventory policy. The scenario envelope is uncalibrated; operating inputs are assumptions.')
-    st.markdown('**Inventory policies · pooled held-out simulation**')
+    st.markdown('**Inventory policies · pooled evaluation simulation**')
     display = totals[['total_cost', 'procurement', 'holding_cost', 'lost_sales_penalty', 'fill_rate', 'ending_inventory']].rename(columns={
         'total_cost': 'Total cost ($)', 'procurement': 'Purchases ($)', 'holding_cost': 'Holding ($)',
         'lost_sales_penalty': 'Unmet-sales penalty ($)', 'fill_rate': 'Proxy fill rate', 'ending_inventory': 'Ending units (sum)'})
@@ -66,9 +68,9 @@ if nav == 'Executive Overview':
             label = {'historical_average': 'trailing-average orders', 'forecast_order_up_to': 'forecast order-up-to'}.get(comparison['baseline'], comparison['baseline'])
             st.write(f"Scenario-optimized cost was **{abs(reduction):.2%} {direction}** than {label} across {comparison['paired_windows']} paired windows.")
     st.bar_chart(totals[['procurement', 'holding_cost', 'lost_sales_penalty']].rename(columns={'procurement': 'Purchases', 'holding_cost': 'Holding', 'lost_sales_penalty': 'Unmet-proxy penalty'}))
-    st.markdown('**Forecast errors · the same held-out windows**')
+    st.markdown('**Forecast errors · the same evaluation windows**')
     st.dataframe(forecast_table.style.format({'mae': '{:.3f}', 'rmse': '{:.3f}', 'wape': '{:.1%}', 'bias': '{:+.3f}'}), hide_index=True, use_container_width=True)
-    st.caption('Lower MAE does not imply lower inventory cost. Three unique calibration blocks support the scenario generator; sampled paths are not independent historical evidence.')
+    st.caption(f"Lower MAE does not imply lower inventory cost. {int(cfg.get('calibration_count', 3))} unique calibration blocks support the scenario generator; sampled paths are not independent historical evidence.")
     st.write(summary['uncertainty_warning'])
 elif nav == 'Demand Intelligence':
     sku = st.selectbox('Product–store', sorted(current.id.unique()))

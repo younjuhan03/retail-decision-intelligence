@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-POLICY_LABELS = {'historical_average': 'Trailing-average orders', 'forecast_order_up_to': 'Forecast order-up-to', 'optimized': 'Scenario-optimized orders'}
+POLICY_LABELS = {'historical_average': 'Trailing-average orders', 'forecast_order_up_to': 'Forecast order-up-to', 'point_optimized': 'Point-forecast optimized orders', 'optimized': 'Scenario-optimized orders'}
 MODEL_LABELS = {'historical_mean': 'Active-history mean', 'seasonal_naive': 'Seasonal naive', 'rolling_mean': 'Trailing 28-day mean', 'gradient_boosting': 'Gradient boosting'}
 
 

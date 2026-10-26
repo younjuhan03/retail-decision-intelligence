@@ -129,3 +129,7 @@ Next: compare point-forecast and uncertainty-aware optimization on pre-test deve
 GitHub hosts this code and research documentation. It does **not** host a live Streamlit app. No external app deployment or real order placement has been performed. See [deployment notes](docs/deployment.md).
 
 **Stack:** Python, pandas, NumPy, SQLite, scikit-learn, SciPy/HiGHS, PyArrow, Streamlit, Matplotlib and pytest.
+
+## Bounded follow-up experiment
+
+A separate, not-yet-computed retrospective comparison adds point-forecast optimization and 17 evaluation windows. The original defaults and published evidence remain unchanged. See [protocol and Windows commands](docs/comparison_experiment.md). No improved performance or new untouched holdout is claimed.
