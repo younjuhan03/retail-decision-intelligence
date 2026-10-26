@@ -1,0 +1,15 @@
+{
+  "stores": ["TX_1", "CA_1", "WI_1"],
+  "per_store_department": 2,
+  "origins": [1773, 1801, 1829, 1857, 1885, 1913],
+  "horizon": 28,
+  "cost_ratio": 0.65,
+  "budget_ratio": 0.75,
+  "holding_daily_ratio": 0.002,
+  "penalty_cost_multiple": 3.0,
+  "lead_days": 2,
+  "initial_days": 3.0,
+  "uncertainty_scale": 1.0,
+  "scenario_count": 8,
+  "seed": 42
+}
