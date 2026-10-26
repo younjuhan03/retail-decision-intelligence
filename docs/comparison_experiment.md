@@ -1,4 +1,4 @@
-# Bounded follow-up comparison (not yet computed on official data)
+# Bounded follow-up comparison
 
 Purpose: distinguish forecast-based proportional ordering, cost-aware point optimization, and scenario optimization across more historical windows. This is a retrospective diagnostic, not a promise of improved cost or a fresh holdout. Preserve the original published study and do not overwrite results/local.
 
@@ -50,4 +50,4 @@ Do not commit raw data or detailed outputs. Do not run scripts/export_evidence.p
 
 Report paired total costs, cost differences per window, lower-cost window counts, fill rate, remaining stock and solver availability. If point optimization beats scenario optimization, that supports investigating uncertainty construction but does not isolate a unique cause. If neither beats simple ordering consistently, retain the simple benchmark and close this experiment. Preserve negative findings. No additional methods are added merely to obtain a positive headline.
 
-Tests on artificial fixtures establish software behavior only. Official-data results for this follow-up are pending local execution; no new performance claim is made.
+Tests on artificial fixtures establish software behavior only. The official-data follow-up is complete; see [verified retrospective results](comparison_results.md).

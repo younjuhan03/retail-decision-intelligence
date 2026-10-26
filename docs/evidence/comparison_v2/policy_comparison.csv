@@ -1,0 +1,5 @@
+candidate,baseline,paired_windows,candidate_total_cost,baseline_total_cost,cost_increase_fraction,lower_cost_windows
+point_optimized,historical_average,17,131127.825218,131805.87752799998,-0.0051443252965402,8
+point_optimized,forecast_order_up_to,17,131127.825218,131858.293814,-0.0055398001511409,15
+optimized,historical_average,17,136010.212676,131805.87752799998,0.0318979337405258,4
+optimized,forecast_order_up_to,17,136010.212676,131858.293814,0.0314877338535618,4

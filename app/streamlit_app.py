@@ -7,13 +7,14 @@ import pandas as pd
 import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 from retailos.pipeline import evaluate_window
-from retailos.reporting import policy_totals, forecast_totals, MODEL_LABELS
+from retailos.reporting import policy_totals, forecast_totals, MODEL_LABELS, POLICY_LABELS, paired_cost_comparison
 
 st.set_page_config(page_title='RetailOS | Inventory Intelligence', page_icon='◈', layout='wide')
 st.markdown('''<style>.stApp{background:#f5f7fb}h1{letter-spacing:-1.5px}div[data-testid="stMetric"]{background:white;border:1px solid #dce4ef;padding:18px;border-radius:12px}.eyebrow{color:#2563eb;font-size:13px;font-weight:700;letter-spacing:3px}.hero{background:#102a43;color:white;border-radius:18px;padding:34px;margin-bottom:24px}.hero h1{color:white}.hero p{color:#bcd1e6}</style>''', unsafe_allow_html=True)
 st.markdown('<div class="hero"><div class="eyebrow">RETAILOS / DECISION INTELLIGENCE</div><h1>From forecasts to inventory decisions.</h1><p>Understand the cost of uncertainty. Allocate a shared budget. Review the evidence.</p></div>', unsafe_allow_html=True)
 root = Path(__file__).resolve().parents[1]
-output = Path(os.environ.get('RETAILOS_RESULTS', str(root / 'results/local')))
+default_output = root / 'results/comparison_v2' if (root / 'results/comparison_v2/summary.json').exists() else root / 'results/local'
+output = Path(os.environ.get('RETAILOS_RESULTS', str(default_output)))
 nav = st.sidebar.radio('Workspace', ['Executive Overview', 'Demand Intelligence', 'Inventory Optimizer', 'Scenario Lab', 'Policy Backtesting', 'AI Decision Review', 'Methodology & Limitations'])
 st.sidebar.caption('Observed M5 sales • Assumed operations • Counterfactual costs')
 if not (output / 'summary.json').exists():
@@ -54,7 +55,19 @@ if nav == 'Executive Overview':
     c1.metric('Product–store series', summary['series_count'])
     c2.metric('Selected forecast', MODEL_LABELS.get(summary['selected_model'], summary['selected_model']))
     c3.metric('10–90% scenario-envelope coverage', f"{summary['empirical_80pct_coverage']:.1%}")
-    st.warning('REVIEW REQUIRED — a better point forecast has not established a better inventory policy. The scenario envelope is uncalibrated; operating inputs are assumptions.')
+    st.warning('REVIEW REQUIRED — retrospective simulation under assumed costs; no production recommendation or calibrated uncertainty guarantee.')
+    comparison = paired_cost_comparison(policies)
+    if not comparison.empty:
+        st.markdown('**Decision evidence · paired comparison with trailing-average orders**')
+        st.dataframe(comparison.style.format({'Cost change vs trailing average': '{:+.2%}'}), hide_index=True, use_container_width=True)
+        st.caption('Negative cost change means lower modeled cost. Window counts describe consistency, not statistical significance.')
+    if 'point_optimized' in set(policies.policy):
+        st.info('Current recommendation: retain trailing-average orders as the practical benchmark. A small aggregate cost advantage from point optimization needs prospective validation; scenario complexity has not established added value.')
+        differences = policies.pivot(index='origin', columns='policy', values='total_cost')
+        differences = differences.sub(differences['historical_average'], axis=0).drop(columns='historical_average')
+        differences = differences.rename(columns=POLICY_LABELS)
+        st.markdown('**Cost difference by evaluation window ($) · below zero is better than trailing average**')
+        st.bar_chart(differences)
     st.markdown('**Inventory policies · pooled evaluation simulation**')
     display = totals[['total_cost', 'procurement', 'holding_cost', 'lost_sales_penalty', 'fill_rate', 'ending_inventory']].rename(columns={
         'total_cost': 'Total cost ($)', 'procurement': 'Purchases ($)', 'holding_cost': 'Holding ($)',
@@ -99,6 +112,8 @@ elif nav in ['Inventory Optimizer', 'Scenario Lab']:
         st.dataframe(pd.DataFrame(alloc), hide_index=True)
         st.caption('The replay uses held-out sales only for evaluation. Recommendations use forecasts and earlier residuals.')
     if nav == 'Scenario Lab':
+        if sensitivity.variant.nunique() == 1:
+            st.info('Only base-case results were computed for this bounded comparison. Use the controls above for exploratory assumption changes.')
         st.subheader('Precomputed one-factor sensitivity')
         st.caption(f'All sensitivity rows below use selected origin d_{origin}.')
         st.dataframe(sensitivity[sensitivity.origin == origin], hide_index=True, use_container_width=True)
@@ -114,8 +129,13 @@ elif nav == 'AI Decision Review':
     decisions = json.loads((output / 'decisions.json').read_text())
     decision = next(x for x in decisions if x['origin'] == origin)
     st.warning(decision['review']['explanation'])
-    st.json(decision)
-    st.write('Advisor: explains verified spend and constraints. Challenger: flags limited evidence and assumed inputs. Coordinator: uses the same validated status. No LLM or invented confidence score is used.')
+    st.markdown('**What the calculation establishes**')
+    st.write('Orders were checked against the modeled purchasing budget. Solver feasibility does not establish business value.')
+    st.markdown('**What requires review**')
+    st.write('Assumed costs, censored sales, sparse uncertainty support and retrospective policy performance. No real orders are submitted.')
+    with st.expander('Technical decision record'):
+        st.json(decision)
+    st.caption('Deterministic rule-based review. No LLM or multi-agent deliberation is implemented.')
 else:
     st.subheader('What this experiment can establish')
     st.markdown((root / 'docs/methodology.md').read_text(encoding='utf-8'))

@@ -44,3 +44,7 @@ Live checks: [GitHub Actions](https://github.com/younjuhan03/retail-decision-int
 4. Current competition data redistribution permissions remain unverified. The repository provides aggregate research summaries and original figures; this does not license or redistribute the M5 source data. Review source terms before adding any other assets.
 5. The source snapshot and already-inspected final windows must be preserved. Revised methods need development-period selection and a clearly designated new holdout before a fresh confirmation claim.
 6. No live external app deployment, production order placement, optional LLM provider or autonomous agent ordering is implemented.
+
+## Completed bounded follow-up
+
+The [17-window retrospective comparison](comparison_results.md) was supplied as a local Windows result archive. Independent daily replay matched all 68 policy-window costs and checked integer orders, budget feasibility, unmet units and ending inventory. This does not independently retrain from raw files. The updated app and matched-window display are covered by software tests; original V1 artifacts remain preserved.

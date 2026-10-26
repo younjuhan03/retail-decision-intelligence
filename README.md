@@ -11,7 +11,9 @@ The first experiment found a useful failure: **gradient boosting reduced daily f
 
 ![Actual application — executive overview](assets/screenshots/executive_overview.png)
 
-## Verified first-run results
+See the [completed 17-window follow-up](#completed-follow-up-comparison) for the four-policy comparison and current recommendation.
+
+## Preserved V1 results
 
 Scope: **42 product–store series**, two 28-day episodes covering **March 28–May 22, 2016**, and 2,352 held-out SKU-days. Initial inventory resets for each episode. The forecast model was selected on an earlier validation window; both final windows were held out for the original run.
 
@@ -130,6 +132,10 @@ GitHub hosts this code and research documentation. It does **not** host a live S
 
 **Stack:** Python, pandas, NumPy, SQLite, scikit-learn, SciPy/HiGHS, PyArrow, Streamlit, Matplotlib and pytest.
 
-## Bounded follow-up experiment
+## Completed follow-up comparison
 
-A separate, not-yet-computed retrospective comparison adds point-forecast optimization and 17 evaluation windows. The original defaults and published evidence remain unchanged. See [protocol and Windows commands](docs/comparison_experiment.md). No improved performance or new untouched holdout is claimed.
+The four-policy retrospective experiment covers 42 series and 17 evaluation windows. Point-forecast optimization had the lowest total modeled cost ($131,127.83), only **0.51% below trailing-average orders**, and won 8/17 matched windows. Trailing-average orders had a higher unit fill rate (79.87% vs 79.35%). Scenario optimization cost **3.19% more** than trailing-average orders and won 4/17 windows.
+
+**Current recommendation:** retain the simple benchmark; treat point optimization's small advantage as exploratory and keep human review. Scenario complexity has not established added value. Only 3/42 series overlap V1, so these are separate studies, not a measured V1-to-V2 performance gain. No fresh-holdout or actual-savings claim is made.
+
+[Follow-up findings and verified evidence](docs/comparison_results.md) · [Protocol and Windows commands](docs/comparison_experiment.md). V1 findings above remain preserved. When local V2 results exist, the dashboard opens them by default; RETAILOS_RESULTS can select a specific run.

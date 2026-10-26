@@ -22,3 +22,15 @@ def test_forecast_rmse_uses_mean_squared_error_and_wape_uses_pooled_denominator(
     assert row.rmse == pytest.approx(np.sqrt(5))
     assert row.wape == pytest.approx(.08)
     assert row.bias == 0
+
+
+def test_comparison_uses_only_paired_windows_and_positive_means_worse():
+    from retailos.reporting import paired_cost_comparison
+    frame = pd.DataFrame([
+        dict(origin=1, policy='historical_average', total_cost=100),
+        dict(origin=2, policy='historical_average', total_cost=1000),
+        dict(origin=1, policy='point_optimized', total_cost=110)])
+    row = paired_cost_comparison(frame).iloc[0]
+    assert row['Paired windows'] == 1
+    assert row['Cost change vs trailing average'] == pytest.approx(.1)
+    assert row['Lower-cost windows'] == 0
