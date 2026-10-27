@@ -12,11 +12,14 @@ from retailos.reporting import policy_totals, forecast_totals, MODEL_LABELS, POL
 
 st.set_page_config(page_title='RetailOS | Inventory Intelligence', page_icon='◈', layout='wide')
 st.markdown('''<style>.stApp{background:#f5f7fb}h1{letter-spacing:-1.5px}div[data-testid="stMetric"]{background:white;border:1px solid #dce4ef;padding:18px;border-radius:12px}.eyebrow{color:#2563eb;font-size:13px;font-weight:700;letter-spacing:3px}.hero{background:#102a43;color:white;border-radius:18px;padding:34px;margin-bottom:24px}.hero h1{color:white}.hero p{color:#bcd1e6}</style>''', unsafe_allow_html=True)
-st.markdown('<div class="hero"><div class="eyebrow">RETAILOS / DECISION INTELLIGENCE</div><h1>From forecasts to inventory decisions.</h1><p>Understand the cost of uncertainty. Allocate a shared budget. Review the evidence.</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero"><div class="eyebrow">RETAILOS / A RETAIL ANALYTICS PROJECT</div><h1>Can better predictions help a retailer order smarter?</h1><p>Comparing simple ordering rules with forecasting and optimization.</p></div>', unsafe_allow_html=True)
 root = Path(__file__).resolve().parents[1]
 default_output = root / 'results/comparison_v2' if (root / 'results/comparison_v2/summary.json').exists() else root / 'results/local'
 output = Path(os.environ.get('RETAILOS_RESULTS', str(default_output)))
-nav = st.sidebar.radio('Workspace', ['Executive Overview', 'Demand Intelligence', 'Inventory Optimizer', 'Scenario Lab', 'Policy Backtesting', 'AI Decision Review', 'Methodology & Limitations'])
+def open_page(page):
+    st.session_state['workspace'] = page
+
+nav = st.sidebar.radio('Explore the project', ['Executive Overview', 'Demand Intelligence', 'Inventory Optimizer', 'Scenario Lab', 'Policy Backtesting', 'AI Decision Review', 'Methodology & Limitations'], key='workspace')
 st.sidebar.caption('Observed M5 sales • Assumed operations • Counterfactual costs')
 if not (output / 'summary.json').exists():
     st.warning('DATA REQUIRED — official M5 results have not been computed.')
@@ -39,59 +42,92 @@ def read_results(folder, version):
             pd.read_csv(p / 'forecast_metrics.csv'), pd.read_csv(p / 'sensitivity.csv'))
 
 summary, cfg, forecasts, policies, metrics, sensitivity = read_results(str(output), (output / 'summary.json').stat().st_mtime_ns)
-st.caption('All costs below are simulation estimates conditional on operating assumptions. No Walmart implementation or endorsement.')
-if 'evaluation_role' in summary:
-    st.info(summary['evaluation_role'])
+if nav != 'Executive Overview':
+    st.caption('Historical simulation under assumed operating costs. No actual retailer savings were measured.')
+    if 'evaluation_role' in summary:
+        st.info(summary['evaluation_role'])
 origin = st.sidebar.selectbox('Forecast origin • detail pages (M5 day)', summary['test_origins'], disabled=nav == 'Executive Overview')
 if nav == 'Executive Overview':
     st.sidebar.caption('Executive Overview pools all evaluation windows. The origin selector applies to detail pages.')
 current = forecasts[forecasts.origin == origin]
 calibration = forecasts[forecasts.origin.isin(cfg['origins'][:int(cfg.get('calibration_count', 3))])]
 if nav == 'Executive Overview':
-    st.subheader('Computed study • all evaluation windows')
-    st.caption(f"Aggregate scope: {len(summary['test_origins'])} evaluation 28-day episodes, {policies.start_date.min()} through {policies.end_date.max()}. Each episode resets initial inventory.")
-    forecast_table = forecast_totals(metrics[metrics.origin.isin(summary['test_origins'])])
-    totals = policy_totals(policies)
-    c1, c2, c3 = st.columns(3)
-    c1.metric('Product–store series', summary['series_count'])
-    c2.metric('Selected forecast', MODEL_LABELS.get(summary['selected_model'], summary['selected_model']))
-    c3.metric('10–90% scenario-envelope coverage', f"{summary['empirical_80pct_coverage']:.1%}")
-    st.warning('REVIEW REQUIRED — retrospective simulation under assumed costs; no production recommendation or calibrated uncertainty guarantee.')
-    comparison = paired_cost_comparison(policies)
-    if not comparison.empty:
-        st.markdown('**Decision evidence · paired comparison with trailing-average orders**')
-        st.dataframe(comparison.style.format({'Cost change vs trailing average': '{:+.2%}'}), hide_index=True, use_container_width=True)
-        st.caption('Negative cost change means lower modeled cost. Window counts describe consistency, not statistical significance.')
-    if 'point_optimized' in set(policies.policy):
-        st.info('Current recommendation: retain trailing-average orders as the practical benchmark. A small aggregate cost advantage from point optimization needs prospective validation; scenario complexity has not established added value.')
-        differences = policies.pivot(index='origin', columns='policy', values='total_cost')
-        differences = differences.sub(differences['historical_average'], axis=0).drop(columns='historical_average')
-        differences = differences.rename(columns=POLICY_LABELS)
-        st.markdown('**Cost difference by evaluation window ($) · below zero is better than trailing average**')
-        chart_rows = differences.rename_axis('Origin').reset_index().melt(id_vars='Origin', var_name='Policy', value_name='Cost difference ($)')
-        chart = alt.Chart(chart_rows).mark_bar().encode(
-            x=alt.X('Origin:O', title='Evaluation origin (M5 day)'),
-            xOffset='Policy:N', y=alt.Y('Cost difference ($):Q'),
-            color='Policy:N', tooltip=['Origin:O', 'Policy:N', alt.Tooltip('Cost difference ($):Q', format=',.2f')])
-        zero = alt.Chart(pd.DataFrame({'zero': [0]})).mark_rule(color='#475569').encode(y='zero:Q')
-        st.altair_chart(chart + zero, use_container_width=True)
-    st.markdown('**Inventory policies · pooled evaluation simulation**')
-    display = totals[['total_cost', 'procurement', 'holding_cost', 'lost_sales_penalty', 'fill_rate', 'ending_inventory']].rename(columns={
-        'total_cost': 'Total cost ($)', 'procurement': 'Purchases ($)', 'holding_cost': 'Holding ($)',
-        'lost_sales_penalty': 'Unmet-sales penalty ($)', 'fill_rate': 'Proxy fill rate', 'ending_inventory': 'Ending units (sum)'})
-    st.dataframe(display.style.format({'Total cost ($)': '{:,.2f}', 'Purchases ($)': '{:,.2f}', 'Holding ($)': '{:,.2f}',
-        'Unmet-sales penalty ($)': '{:,.2f}', 'Proxy fill rate': '{:.1%}', 'Ending units (sum)': '{:,.0f}'}), use_container_width=True)
-    for comparison in summary['improvements']:
-        reduction = comparison.get('simulation_cost_change_fraction')
-        if reduction is not None:
-            direction = 'lower' if reduction >= 0 else 'higher'
-            label = {'historical_average': 'trailing-average orders', 'forecast_order_up_to': 'forecast order-up-to'}.get(comparison['baseline'], comparison['baseline'])
-            st.write(f"Scenario-optimized cost was **{abs(reduction):.2%} {direction}** than {label} across {comparison['paired_windows']} paired windows.")
-    st.bar_chart(totals[['procurement', 'holding_cost', 'lost_sales_penalty']].rename(columns={'procurement': 'Purchases', 'holding_cost': 'Holding', 'lost_sales_penalty': 'Unmet-proxy penalty'}))
-    st.markdown('**Forecast errors · the same evaluation windows**')
-    st.dataframe(forecast_table.style.format({'mae': '{:.3f}', 'rmse': '{:.3f}', 'wape': '{:.1%}', 'bias': '{:+.3f}'}), hide_index=True, use_container_width=True)
-    st.caption(f"Lower MAE does not imply lower inventory cost. {int(cfg.get('calibration_count', 3))} unique calibration blocks support the scenario generator; sampled paths are not independent historical evidence.")
-    st.write(summary['uncertainty_warning'])
+    st.subheader('The question')
+    st.write('A retailer has a limited budget. How much should it order of each product to balance leftover stock and unfilled sales?')
+    st.write('I used historical retail sales to compare simple ordering rules with methods that use sales predictions and mathematical optimization.')
+    st.caption(f"This study: {summary['series_count']} product–store combinations · {len(summary['test_origins'])} separate 28-day periods · {policies.policy.nunique()} ordering methods. Each period starts with a reset inventory.")
+    st.subheader('What the comparison found')
+    costs = policies.pivot(index='origin', columns='policy', values='total_cost')
+    if {'point_optimized', 'optimized', 'historical_average'}.issubset(costs.columns):
+        a, b, c = st.columns(3)
+        for column, candidate, label in [(a, 'point_optimized', 'Using one predicted sales path'), (c, 'optimized', 'Using several possible sales paths')]:
+            paired = costs[['historical_average', candidate]].dropna()
+            denominator = paired.historical_average.sum()
+            change = (paired[candidate].sum() / denominator - 1) if denominator else None
+            column.metric(label, f'{abs(change):.2%} {"lower" if change < 0 else "higher"}' if change is not None else 'Not available')
+            column.caption('Simulated cost compared with ordering from recent average sales.')
+        paired = costs[['historical_average', 'point_optimized']].dropna()
+        wins = int((paired.point_optimized < paired.historical_average).sum())
+        b.metric('Periods with lower point-optimized cost', f'{wins} of {len(paired)}')
+        b.caption('How often the single-path optimizer beat the simple average-sales rule.')
+        st.write('In the published follow-up, point optimization had a small total cost advantage, but did not win consistently. The simple average-sales rule filled a larger share of observed sales.')
+    else:
+        st.write('This is the initial study. The detailed evidence below compares simple ordering rules with scenario optimization; the follow-up adds point-forecast optimization.')
+    st.subheader('What I learned')
+    st.write('Better predictions do not automatically lead to better decisions. The assumptions about future sales and operating costs matter too.')
+    st.info('My takeaway: keep the simple ordering rule as the benchmark. I want to better understand how uncertainty and optimization can support dependable decisions.')
+    st.caption('These are retrospective simulations, not actual Walmart savings. Costs and starting stock are assumed; the follow-up is exploratory, not a new independent test.')
+    st.subheader('Explore a little further')
+    left, middle, right = st.columns(3)
+    left.button('Compare ordering methods', on_click=open_page, args=('Policy Backtesting',), use_container_width=True)
+    middle.button('What if the budget changes?', on_click=open_page, args=('Scenario Lab',), use_container_width=True)
+    right.button('How did I study this?', on_click=open_page, args=('Methodology & Limitations',), use_container_width=True)
+    st.caption('Optimization means calculating order quantities to minimize purchasing, holding and unfilled-sales costs within a budget. The controls let you explore the assumptions; no real orders are placed.')
+    with st.expander('See detailed results, charts and technical measures', expanded=False):
+        st.subheader('Computed study • all evaluation windows')
+        st.caption(f"Aggregate scope: {len(summary['test_origins'])} evaluation 28-day episodes, {policies.start_date.min()} through {policies.end_date.max()}. Each episode resets initial inventory.")
+        forecast_table = forecast_totals(metrics[metrics.origin.isin(summary['test_origins'])])
+        totals = policy_totals(policies)
+        c1, c2, c3 = st.columns(3)
+        c1.metric('Product–store series', summary['series_count'])
+        c2.metric('Selected forecast', MODEL_LABELS.get(summary['selected_model'], summary['selected_model']))
+        c3.metric('10–90% scenario-envelope coverage', f"{summary['empirical_80pct_coverage']:.1%}")
+        st.warning('REVIEW REQUIRED — retrospective simulation under assumed costs; no production recommendation or calibrated uncertainty guarantee.')
+        comparison = paired_cost_comparison(policies)
+        if not comparison.empty:
+            st.markdown('**Decision evidence · paired comparison with trailing-average orders**')
+            st.dataframe(comparison.style.format({'Cost change vs trailing average': '{:+.2%}'}), hide_index=True, use_container_width=True)
+            st.caption('Negative cost change means lower modeled cost. Window counts describe consistency, not statistical significance.')
+        if 'point_optimized' in set(policies.policy):
+            st.info('Current recommendation: retain trailing-average orders as the practical benchmark. A small aggregate cost advantage from point optimization needs prospective validation; scenario complexity has not established added value.')
+            differences = policies.pivot(index='origin', columns='policy', values='total_cost')
+            differences = differences.sub(differences['historical_average'], axis=0).drop(columns='historical_average')
+            differences = differences.rename(columns=POLICY_LABELS)
+            st.markdown('**Cost difference by evaluation window ($) · below zero is better than trailing average**')
+            chart_rows = differences.rename_axis('Origin').reset_index().melt(id_vars='Origin', var_name='Policy', value_name='Cost difference ($)')
+            chart = alt.Chart(chart_rows).mark_bar().encode(
+                x=alt.X('Origin:O', title='Evaluation origin (M5 day)'),
+                xOffset='Policy:N', y=alt.Y('Cost difference ($):Q'),
+                color='Policy:N', tooltip=['Origin:O', 'Policy:N', alt.Tooltip('Cost difference ($):Q', format=',.2f')])
+            zero = alt.Chart(pd.DataFrame({'zero': [0]})).mark_rule(color='#475569').encode(y='zero:Q')
+            st.altair_chart(chart + zero, use_container_width=True)
+        st.markdown('**Inventory policies · pooled evaluation simulation**')
+        display = totals[['total_cost', 'procurement', 'holding_cost', 'lost_sales_penalty', 'fill_rate', 'ending_inventory']].rename(columns={
+            'total_cost': 'Total cost ($)', 'procurement': 'Purchases ($)', 'holding_cost': 'Holding ($)',
+            'lost_sales_penalty': 'Unmet-sales penalty ($)', 'fill_rate': 'Proxy fill rate', 'ending_inventory': 'Ending units (sum)'})
+        st.dataframe(display.style.format({'Total cost ($)': '{:,.2f}', 'Purchases ($)': '{:,.2f}', 'Holding ($)': '{:,.2f}',
+            'Unmet-sales penalty ($)': '{:,.2f}', 'Proxy fill rate': '{:.1%}', 'Ending units (sum)': '{:,.0f}'}), use_container_width=True)
+        for comparison in summary['improvements']:
+            reduction = comparison.get('simulation_cost_change_fraction')
+            if reduction is not None:
+                direction = 'lower' if reduction >= 0 else 'higher'
+                label = {'historical_average': 'trailing-average orders', 'forecast_order_up_to': 'forecast order-up-to'}.get(comparison['baseline'], comparison['baseline'])
+                st.write(f"Scenario-optimized cost was **{abs(reduction):.2%} {direction}** than {label} across {comparison['paired_windows']} paired windows.")
+        st.bar_chart(totals[['procurement', 'holding_cost', 'lost_sales_penalty']].rename(columns={'procurement': 'Purchases', 'holding_cost': 'Holding', 'lost_sales_penalty': 'Unmet-proxy penalty'}))
+        st.markdown('**Forecast errors · the same evaluation windows**')
+        st.dataframe(forecast_table.style.format({'mae': '{:.3f}', 'rmse': '{:.3f}', 'wape': '{:.1%}', 'bias': '{:+.3f}'}), hide_index=True, use_container_width=True)
+        st.caption(f"Lower MAE does not imply lower inventory cost. {int(cfg.get('calibration_count', 3))} unique calibration blocks support the scenario generator; sampled paths are not independent historical evidence.")
+        st.write(summary['uncertainty_warning'])
 elif nav == 'Demand Intelligence':
     sku = st.selectbox('Product–store', sorted(current.id.unique()))
     subset = current[current.id == sku].set_index('day')
