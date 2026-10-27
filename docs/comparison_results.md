@@ -38,3 +38,7 @@ Purchase cost, penalties, initial stock and holding cost are assumed; observed s
 [Protocol and Windows commands](comparison_experiment.md) · [Policy totals](evidence/comparison_v2/policy_totals.csv) · [All 68 window results](evidence/comparison_v2/policy_windows.csv) · [Paired comparisons](evidence/comparison_v2/policy_comparison.csv) · [Forecast metrics](evidence/comparison_v2/forecast_metrics.csv) · [Metadata and source-result hashes](evidence/comparison_v2/metadata.json)
 
 The public files are aggregate research results, not source observations or detailed SKU orders. V1 evidence is preserved. The app automatically prefers results/comparison_v2 when available unless RETAILOS_RESULTS explicitly selects another directory.
+
+## Presentation
+
+[Print-friendly English case study](comparison_case_study.html) — download and open locally. Use Print / Save as PDF; disable browser headers and footers. This separate page avoids Streamlit table clipping and popups. The original dashboard remains interactive.

@@ -4,6 +4,7 @@ import sys
 import json
 import os
 import pandas as pd
+import altair as alt
 import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 from retailos.pipeline import evaluate_window
@@ -67,7 +68,13 @@ if nav == 'Executive Overview':
         differences = differences.sub(differences['historical_average'], axis=0).drop(columns='historical_average')
         differences = differences.rename(columns=POLICY_LABELS)
         st.markdown('**Cost difference by evaluation window ($) · below zero is better than trailing average**')
-        st.bar_chart(differences)
+        chart_rows = differences.rename_axis('Origin').reset_index().melt(id_vars='Origin', var_name='Policy', value_name='Cost difference ($)')
+        chart = alt.Chart(chart_rows).mark_bar().encode(
+            x=alt.X('Origin:O', title='Evaluation origin (M5 day)'),
+            xOffset='Policy:N', y=alt.Y('Cost difference ($):Q'),
+            color='Policy:N', tooltip=['Origin:O', 'Policy:N', alt.Tooltip('Cost difference ($):Q', format=',.2f')])
+        zero = alt.Chart(pd.DataFrame({'zero': [0]})).mark_rule(color='#475569').encode(y='zero:Q')
+        st.altair_chart(chart + zero, use_container_width=True)
     st.markdown('**Inventory policies · pooled evaluation simulation**')
     display = totals[['total_cost', 'procurement', 'holding_cost', 'lost_sales_penalty', 'fill_rate', 'ending_inventory']].rename(columns={
         'total_cost': 'Total cost ($)', 'procurement': 'Purchases ($)', 'holding_cost': 'Holding ($)',

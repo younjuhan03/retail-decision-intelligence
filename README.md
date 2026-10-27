@@ -139,3 +139,7 @@ The four-policy retrospective experiment covers 42 series and 17 evaluation wind
 **Current recommendation:** retain the simple benchmark; treat point optimization's small advantage as exploratory and keep human review. Scenario complexity has not established added value. Only 3/42 series overlap V1, so these are separate studies, not a measured V1-to-V2 performance gain. No fresh-holdout or actual-savings claim is made.
 
 [Follow-up findings and verified evidence](docs/comparison_results.md) · [Protocol and Windows commands](docs/comparison_experiment.md). V1 findings above remain preserved. When local V2 results exist, the dashboard opens them by default; RETAILOS_RESULTS can select a specific run.
+
+Print-friendly follow-up: [standalone English case study](docs/comparison_case_study.html). Open locally and use Print / Save as PDF. Tables fit the page; the grouped cost-difference chart preserves separate policy comparisons. Regenerate with `python scripts/build_comparison_page.py`.
+
+[Download the two-page PDF](docs/comparison_case_study.pdf).
