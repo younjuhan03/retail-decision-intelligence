@@ -1,17 +1,27 @@
 # RetailOS
-### From Demand Forecasting to Better Inventory Decisions
+### Does a better forecast lead to a better inventory decision?
 
 [![Software verification](https://github.com/younjuhan03/retail-decision-intelligence/actions/workflows/tests.yml/badge.svg)](https://github.com/younjuhan03/retail-decision-intelligence/actions/workflows/tests.yml)
 
-**First real-data study completed. Research prototype; inventory recommendation remains REVIEW REQUIRED.**
+A Python decision-support research project connecting sales forecasting, budget-constrained integer ordering, and historical policy evaluation.
 
-RetailOS asks a business question: **can better sales forecasts and joint budget optimization improve inventory decisions over practical ordering rules?** It connects official M5 sales data, chronological forecasting, integer inventory optimization, policy replay and grounded decision review in a Streamlit application.
+| The question | The experiment | The finding | The recommendation |
+|---|---|---|---|
+| How should a retailer divide a limited purchasing budget across products? | Compare four ordering policies across 42 product–store series and 17 historical 28-day episodes. | Point optimization had 0.51% lower aggregate modeled cost than trailing-average orders, but won only 8/17 windows. Scenario optimization cost 3.19% more. | Retain the simple benchmark; validate the small point-optimization advantage prospectively before adoption. |
 
-The first experiment found a useful failure: **gradient boosting reduced daily forecast MAE by 8.04%, but scenario optimization increased simulated inventory cost by 11.97% versus a trailing-average ordering policy.** Better average prediction did not produce a better allocation of the same purchasing budget.
+**Why this matters:** a lower prediction error does not establish a better business decision. This project evaluates both and preserves results that do not favor the more complex method.
 
-![Actual application — executive overview](assets/screenshots/executive_overview.png)
+**Read in one minute:** [project overview](docs/project_overview.html) · **Read the evidence:** [two-page PDF](docs/comparison_case_study.pdf) · [detailed follow-up](docs/comparison_results.md) · **Inspect the implementation:** [pipeline](src/retailos/pipeline.py) · [tests](tests/)
 
-See the [completed 17-window follow-up](#completed-follow-up-comparison) for the four-policy comparison and current recommendation.
+HTML pages must be downloaded and opened locally; GitHub displays their source. No live app is deployed. Local app instructions appear below.
+
+**Evidence boundary:** exploratory retrospective simulations under assumed costs, not actual Walmart savings or a fresh holdout. Trailing-average orders also had the higher unit fill rate (79.87% versus 79.35% for point optimization). The studies use different product selections; V1-to-V2 totals are not a controlled improvement comparison.
+
+**What is implemented:** source validation and provenance; time-ordered forecasting; shared-budget integer optimization; equal-constraint policy replay; a Streamlit dashboard; deterministic decision review. No LLM computes orders and no real orders are submitted.
+
+## Study history
+
+The initial two-window study found an 8.04% reduction in daily forecast MAE but an 11.97% increase in scenario-optimized cost versus trailing-average orders. The bounded follow-up added point optimization and more historical windows. It supports a cautious policy choice, not a claim that optimization always wins.
 
 ## Preserved V1 results
 
