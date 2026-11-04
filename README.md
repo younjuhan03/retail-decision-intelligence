@@ -19,6 +19,10 @@ HTML pages must be downloaded and opened locally; GitHub displays their source. 
 
 **What is implemented:** source validation and provenance; time-ordered forecasting; shared-budget integer optimization; equal-constraint policy replay; a Streamlit dashboard; deterministic decision review. No LLM computes orders and no real orders are submitted.
 
+## Authorship and AI assistance
+
+I developed this as an exploratory decision-support project with AI assistance in planning, code implementation, testing, and documentation. My focus was examining the forecast-to-ordering question, comparing the documented policy results, and identifying where the evidence does not justify adoption. This is not a deployed retail system or a claim of independently authored code.
+
 ## Study history
 
 The initial two-window study found an 8.04% reduction in daily forecast MAE but an 11.97% increase in scenario-optimized cost versus trailing-average orders. The bounded follow-up added point optimization and more historical windows. It supports a cautious policy choice, not a claim that optimization always wins.
