@@ -1,6 +1,6 @@
 # Data dictionary and lineage
 
-Official schema requirements below are enforced by the loader. The user completed the official-file audit and pipeline on Windows; the resulting selected panel and provenance were inspected independently. Full raw files are not bundled in the repository.
+Official schema requirements below are enforced by the loader. I ran the official-file audit and pipeline on Windows. The saved panel and provenance support a separate check of the results. Full raw files are not bundled in the repository.
 
 | Field | Source | Interpretation / availability |
 |---|---|---|

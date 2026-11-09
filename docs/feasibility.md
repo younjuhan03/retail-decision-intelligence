@@ -1,12 +1,12 @@
 # Feasibility and data-access record — 2026-10-26
 
-**Current state: first real-data pipeline completed; initial access blocker resolved by the user's official Kaggle download.**
+**I completed the initial real-data pipeline after downloading the official M5 files through my Kaggle account.**
 
 ## Access history
 
-Initial unauthenticated Kaggle API probes returned HTTP 401 in the build environment. The user subsequently downloaded the official competition files through their Kaggle account, placed the CSVs in `data/raw`, passed the source audit and executed the complete pipeline on Windows. The user supplied the completed result archive for independent inspection; no alternate sales dataset was substituted.
+Initial unauthenticated Kaggle API probes returned HTTP 401 in the build environment. I downloaded the official competition files through my Kaggle account, placed the CSVs in `data/raw`, passed the source audit and ran the pipeline on Windows. I retained the result archive so the saved outputs could be checked separately. I used the official sales data throughout.
 
-The raw official CSVs were not sent to the current execution environment. Independent checks here replay saved decisions against the supplied selected panel and verify aggregate outputs. This is distinct from an independent raw-to-results training replication.
+The separate verification used my saved decisions and selected panel to replay inventory accounting and check aggregate outputs. It did not repeat training from the complete official raw files.
 
 ## Source audit from the final inspected run
 

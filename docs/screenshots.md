@@ -1,6 +1,6 @@
 # Actual application screenshots
 
-The committed images were captured from the updated running Streamlit application using the user's inspected first real-data result archive. They are not generated UI mockups. No personal browser tabs, local usernames, credentials or raw SKU observations are shown.
+The committed images were captured from the updated running Streamlit application using my saved first real-data result archive. They are not generated UI mockups. No personal browser tabs, local usernames, credentials or raw SKU observations are shown.
 
 - [Executive overview](../assets/screenshots/executive_overview.png): pools the two held-out episodes and shows the negative simulated optimization result.
 - [Policy backtesting](../assets/screenshots/policy_backtesting.png): the selected d_1885 episode only.

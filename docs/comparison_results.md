@@ -1,16 +1,16 @@
 # Follow-up results: point forecasts versus scenario optimization
 
-Status: computed; HUMAN REVIEW REQUIRED. This bounded experiment is complete; no further model search is planned merely to obtain a favorable headline.
+I completed the four-policy comparison and retained the simple ordering benchmark as my recommendation. The saved decision records remain HUMAN REVIEW REQUIRED.
 
 ## Decision
 
-Retain trailing-average ordering as the practical benchmark. Point-forecast optimization has the lowest aggregate modeled cost, but its 0.51% advantage over the benchmark is small and it wins only 8 of 17 windows. Trailing-average ordering has a higher pooled unit fill rate. Scenario optimization has not established added value. Any deployment choice needs prospective validation and verified operating inputs.
+I would retain trailing-average ordering as the practical benchmark. Point-forecast optimization has the lowest aggregate modeled cost, but its 0.51% advantage over the benchmark is small and it wins only 8 of 17 windows. Trailing-average ordering has a higher pooled unit fill rate. Scenario optimization has not established added value. Any deployment choice needs prospective validation and verified operating inputs.
 
 ## Scope
 
 42 product–store series, 17 nonoverlapping 28-day episodes from February 2, 2015 through May 22, 2016 (19,992 SKU-days). Each episode resets stock. Twelve earlier residual blocks support eight sampled scenario paths; one earlier window selects the forecast model by MAE. This is a retrospective diagnostic, includes previously inspected periods, and is not a fresh holdout. Shared histories and seasons make results dependent.
 
-Only 3 of 42 series are shared with V1 because selection uses an earlier cutoff. Do not describe V1's 11.97% cost increase and V2's 3.19% increase as a measured improvement from the revision: products and time periods changed.
+Only 3 of 42 series are shared with V1 because selection uses an earlier cutoff. I report V1 and the follow-up as separate studies because the products and time periods changed; their cost differences are not a controlled improvement measure.
 
 ## Four-policy comparison
 

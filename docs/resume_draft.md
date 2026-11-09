@@ -1,9 +1,7 @@
-# Resume-ready project description
+# My RetailOS project summary
 
-RetailOS — Inventory Decision Intelligence | Python, SQL, scikit-learn, SciPy/HiGHS, Streamlit
+I compared four inventory policies across 42 product–store series and 17 historical 28-day episodes, connecting sales forecasting, integer budget allocation and policy evaluation.
 
-- Built a reproducible M5 sales forecasting and inventory decision application for 42 product–store series, connecting data validation, integer budget allocation and an interactive Streamlit dashboard.
-- Evaluated four forecasting models chronologically; gradient boosting reduced held-out daily MAE by 8.04% versus a trailing 28-day mean across two 28-day test windows.
-- Compared three inventory policies under identical simulated operating constraints; diagnosed an 11.97% cost increase from scenario optimization and validated results with independent accounting replay and sensitivity analysis.
+My central finding is that point optimization's 0.51% aggregate modeled-cost advantage over trailing-average orders was inconsistent across periods (8/17 wins) and accompanied by a lower unit fill rate. Scenario optimization cost 3.19% more. I would retain the simple benchmark pending prospective validation.
 
-These claims describe the inspected first run. Costs are counterfactual simulation estimates, not measured Walmart operating savings. No autonomous LLM ordering or production deployment is claimed. Explain the assumptions and the negative optimization result when discussing this project.
+I use this project to explain why model accuracy and decision value require separate evaluation. The results are simulations under assumed costs, not observed retailer savings. [Detailed evidence](comparison_results.md) preserves the method, comparison and boundaries.

@@ -19,7 +19,7 @@ output = Path(os.environ.get('RETAILOS_RESULTS', str(default_output)))
 def open_page(page):
     st.session_state['workspace'] = page
 
-nav = st.sidebar.radio('Explore the project', ['Executive Overview', 'Demand Intelligence', 'Inventory Optimizer', 'Scenario Lab', 'Policy Backtesting', 'AI Decision Review', 'Methodology & Limitations'], key='workspace')
+nav = st.sidebar.radio('Explore the project', ['Executive Overview', 'Demand Intelligence', 'Inventory Optimizer', 'Scenario Lab', 'Policy Backtesting', 'Decision Review', 'Methodology & Limitations'], key='workspace')
 st.sidebar.caption('Observed M5 sales • Assumed operations • Counterfactual costs')
 if not (output / 'summary.json').exists():
     st.warning('DATA REQUIRED — official M5 results have not been computed.')
@@ -31,7 +31,7 @@ if not (output / 'summary.json').exists():
     st.write('Download the official M5 files from Kaggle after reviewing its access and usage terms. Place them in data/raw and run the pipeline. No artificial sales or savings are displayed.')
     st.code('python -m retailos.cli audit\npython -m retailos.cli run', language='powershell')
     st.link_button('Official M5 dataset', 'https://www.kaggle.com/competitions/m5-forecasting-accuracy/data')
-    st.info('The quantitative engine and automated tests can run independently of an AI API. Actual model comparisons, order allocations and business findings require the official files.')
+    st.info('The quantitative engine runs locally. Model comparisons, order allocations and business findings require the official files.')
     st.stop()
 
 @st.cache_data
@@ -75,7 +75,7 @@ if nav == 'Executive Overview':
         st.write('This is the initial study. The detailed evidence below compares simple ordering rules with scenario optimization; the follow-up adds point-forecast optimization.')
     st.subheader('What I learned')
     st.write('Better predictions do not automatically lead to better decisions. The assumptions about future sales and operating costs matter too.')
-    st.info('My takeaway: keep the simple ordering rule as the benchmark. I want to better understand how uncertainty and optimization can support dependable decisions.')
+    st.info('My takeaway: keep the simple ordering rule as the benchmark. I want to study how optimization objectives, uncertainty and service levels should jointly guide an operating decision.')
     st.caption('These are retrospective simulations, not actual Walmart savings. Costs and starting stock are assumed; the follow-up is exploratory, not a new independent test.')
     st.subheader('Explore a little further')
     left, middle, right = st.columns(3)
@@ -167,7 +167,7 @@ elif nav == 'Policy Backtesting':
     st.dataframe(selected_policies, hide_index=True, use_container_width=True)
     st.bar_chart(policy_totals(selected_policies)[['procurement', 'holding_cost', 'lost_sales_penalty']])
     st.caption('Each window resets to the same assumed inventory. This is a repeated episode study, not continuous Walmart replenishment history.')
-elif nav == 'AI Decision Review':
+elif nav == 'Decision Review':
     st.subheader('Grounded review • deterministic mode')
     decisions = json.loads((output / 'decisions.json').read_text())
     decision = next(x for x in decisions if x['origin'] == origin)

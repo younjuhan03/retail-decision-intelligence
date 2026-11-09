@@ -72,7 +72,7 @@ def test_full_pipeline_on_artificial_schema_fixture(tmp_path, tiny_panel, monkey
     from streamlit.testing.v1 import AppTest
     monkeypatch.setenv('RETAILOS_RESULTS', str(output))
     app_path = str(Path(__file__).parents[1] / 'app/streamlit_app.py')
-    for nav in ['Executive Overview', 'Demand Intelligence', 'Inventory Optimizer', 'Scenario Lab', 'Policy Backtesting', 'AI Decision Review', 'Methodology & Limitations']:
+    for nav in ['Executive Overview', 'Demand Intelligence', 'Inventory Optimizer', 'Scenario Lab', 'Policy Backtesting', 'Decision Review', 'Methodology & Limitations']:
         app = AppTest.from_file(app_path, default_timeout=60).run()
         app.sidebar.radio[0].set_value(nav).run()
         if nav == 'Inventory Optimizer':

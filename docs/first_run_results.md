@@ -4,7 +4,7 @@ Status: **computed; REVIEW REQUIRED**. This is an initial research result, not a
 
 ## Scope and evidence
 
-The user executed the official-data pipeline on Windows / Python 3.14.6 and supplied the complete result archive for inspection. The inspected run selected 42 product–store series across TX_1, CA_1 and WI_1; the selected panel has 81,522 daily rows. Seventeen candidates were excluded for insufficient early price-listing history. The final selected panel has 16,002 missing-price rows and zero positive-sales rows without a matching price. The optional validation release agrees on common selected observations.
+I ran the official-data pipeline on Windows / Python 3.14.6 and retained the complete result archive for verification. The inspected run selected 42 product–store series across TX_1, CA_1 and WI_1; the selected panel has 81,522 daily rows. Seventeen candidates were excluded for insufficient early price-listing history. The final selected panel has 16,002 missing-price rows and zero positive-sales rows without a matching price. The optional validation release agrees on common selected observations.
 
 The earlier pre-fix audit reported a different missing-price count because it selected different products. The final run's provenance, not that earlier audit, is the source for this document.
 

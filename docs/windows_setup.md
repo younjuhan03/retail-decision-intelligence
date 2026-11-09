@@ -1,7 +1,7 @@
 # Windows setup and reproduction
 
 1. Open `retail-decision-intelligence` in VS Code and open a PowerShell terminal.
-2. Check Python with `python --version`. The user completed the original real-data run on Python 3.14.6; CI targets Python 3.11.
+2. Check Python with `python --version`. I completed the original real-data run on Python 3.14.6; CI targets Python 3.11.
 3. Run:
 
 ```powershell
