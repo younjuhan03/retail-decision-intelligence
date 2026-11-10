@@ -37,9 +37,9 @@ These are retrospective simulations under assumed operating costs, not measured 
 - **Read aggregate cost alongside consistency and service.** A $678.05 pooled advantage is not enough for me to prefer point optimization when it wins fewer than half the periods and fills a smaller share of sales.
 - **Retain an unfavorable result.** Scenario optimization cost 3.19% more than the benchmark. I would investigate its uncertainty representation before adding complexity.
 
-## What I want to study next
+## What I learned and want to deepen
 
-I want to connect forecasting, optimization and business objectives more rigorously. How should an operating decision weigh a small cost advantage against service levels, unstable performance and uncertain inputs? That is the kind of decision evaluation I want to pursue in graduate study in business analytics.
+I learned to evaluate an ordering policy through cost, consistency and service together. My simulation also showed me a gap in my approach: I could compare policies under chosen assumptions, but I had not established how to select those assumptions or a service requirement for a real operating decision. I want to deepen my understanding of optimization under uncertainty and time-series evaluation, so I can design policies whose tradeoffs are explicit and whose performance I can test on new periods.
 
 ## My next validation step
 
