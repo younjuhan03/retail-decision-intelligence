@@ -9,6 +9,16 @@ I compared four ordering policies across **42 product–store series and 17 hist
 
 **Explore:** [one-minute overview](docs/project_overview.html) · [two-page PDF](docs/comparison_case_study.pdf) · [detailed findings](docs/comparison_results.md) · [implementation](src/retailos/pipeline.py)
 
+## My project in plain English
+
+I studied a store's ordering decision: **how much of each product should I buy when my purchasing budget is limited?** I used historical M5 sales to compare a simple recent-sales rule with three forecast-based ordering policies.
+
+- **What I built:** I connected sales forecasting, budget-constrained order calculations and a dashboard for comparing inventory policies.
+- **How I evaluated it:** I replayed 17 historical periods with the same starting conditions for each policy, then compared cost and the share of sales covered by stock.
+- **What I learned:** I found a small overall cost advantage for point-forecast optimization, but inconsistent results and weaker service. I would keep the simple rule as my reference while gathering stronger evidence.
+
+I use **unit fill rate** to mean the share of evaluated sales quantities I could fulfill in the simulation. I report modeled costs under stated assumptions; I have not measured savings at a real retailer.
+
 ## What I compared
 
 | Ordering policy | Modeled cost | Change vs. trailing average | Lower-cost periods | Unit fill rate |
