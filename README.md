@@ -41,6 +41,10 @@ These are retrospective simulations under assumed operating costs, not measured 
 
 I want to connect forecasting, optimization and business objectives more rigorously. How should an operating decision weigh a small cost advantage against service levels, unstable performance and uncertain inputs? That is the kind of decision evaluation I want to pursue in graduate study in business analytics.
 
+## My next validation step
+
+For my next evaluation, I would fix the ordering rules, cost assumptions and a minimum service requirement before observing new periods, then compare cost and fill rate against the trailing-average policy.
+
 ## Methods and evidence
 
 My workflow connects source validation, time-ordered forecasting, shared-budget integer optimization, policy replay and a Streamlit dashboard.
@@ -56,6 +60,6 @@ I use official [M5 source files](https://www.kaggle.com/competitions/m5-forecast
 
 Operating costs and initial stock are assumptions, observed sales may understate demand, and inventory resets each episode. The follow-up is exploratory and includes previously inspected periods. Only 3 of 42 series overlap the initial study, so I report the studies separately rather than claim a controlled performance improvement. I have not established statistical significance or validated a deployment decision.
 
-## Development note
+## AI-assisted development
 
-I used AI tools to support project development, including code and documentation.
+I used AI tools to support project development, including code and documentation. I take responsibility for the analytical choices and interpretations presented here, and I document the data, comparisons, assumptions and limitations behind my conclusions. I distinguish AI assistance during development from the models I actually implement; I describe those models in the methods rather than imply that I built an LLM-based system.
