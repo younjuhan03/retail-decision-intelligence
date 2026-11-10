@@ -39,7 +39,7 @@ These are retrospective simulations under assumed operating costs, not measured 
 
 ## What I learned and want to deepen
 
-I learned to evaluate an ordering policy through cost, consistency and service together. My simulation also showed me a gap in my approach: I could compare policies under chosen assumptions, but I had not established how to select those assumptions or a service requirement for a real operating decision. I want to deepen my understanding of optimization under uncertainty and time-series evaluation, so I can design policies whose tradeoffs are explicit and whose performance I can test on new periods.
+A small pooled cost advantage was not enough for me to recommend changing the ordering policy. I also had to consider service levels and how often the policy performed better. I can compare those outcomes under fixed assumptions; my next learning goal is to formulate the operating problem more carefully, using constrained optimization to express which service requirements must be met and which costs can be traded off.
 
 ## My next validation step
 
